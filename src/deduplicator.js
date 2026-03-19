@@ -5,9 +5,10 @@ import chalk from 'chalk';
 /**
  * Deduplicates a list of contacts based on phone or email.
  * @param {Array} contacts 
+ * @param {string|null} defaultAction
  * @returns {Promise<Array>}
  */
-async function deduplicate(contacts) {
+async function deduplicate(contacts, defaultAction = null) {
     const uniqueContacts = [];
     const phoneMap = new Map(); // Normalized Phone -> uniqueContact index
     const emailMap = new Map(); // Normalized Email -> uniqueContact index
@@ -59,23 +60,23 @@ async function deduplicate(contacts) {
                 }
             }
 
-            const action = await promptMergeAction(existing, contact, matchReason, i + 1, contacts.length);
+            const action = defaultAction || await promptMergeAction(existing, contact, matchReason, i + 1, contacts.length);
 
             if (action === 'merge') {
-                const merged = await mergeContacts(existing, contact);
+                const merged = await mergeContacts(existing, contact, defaultAction);
                 uniqueContacts[duplicateIdx] = merged;
                 updateMaps(merged, duplicateIdx, phoneMap, emailMap);
-                console.log(chalk.green('  ✔ Merged details.'));
+                console.log(chalk.green(`  ✔ Merged details (${i+1}/${contacts.length})`));
             } else if (action === 'keep_existing') {
-                console.log(chalk.gray('  ➜ Kept existing.'));
+                console.log(chalk.gray(`  ➜ Kept existing (${i+1}/${contacts.length})`));
             } else if (action === 'use_new') {
                 uniqueContacts[duplicateIdx] = contact;
                 updateMaps(contact, duplicateIdx, phoneMap, emailMap);
-                console.log(chalk.blue('  ➜ Used incoming.'));
+                console.log(chalk.blue(`  ➜ Used incoming (${i+1}/${contacts.length})`));
             } else if (action === 'add') {
                 uniqueContacts.push(contact);
                 updateMaps(contact, uniqueContacts.length - 1, phoneMap, emailMap);
-                console.log(chalk.yellow('  ➜ Added as separate.'));
+                console.log(chalk.yellow(`  ➜ Added as separate (${i+1}/${contacts.length})`));
             }
         } else {
             // New unique contact
@@ -128,7 +129,7 @@ async function promptMergeAction(existing, incoming, matchReason, current, total
     return action;
 }
 
-async function mergeContacts(existing, incoming) {
+async function mergeContacts(existing, incoming, defaultAction = null) {
     // Basic merge: combine arrays, unique values
     const merged = {
         fn: existing.fn, // We'll ask to confirm name below
@@ -140,7 +141,7 @@ async function mergeContacts(existing, incoming) {
         raw: existing.raw // We'll need to update this too or build a new one
     };
 
-    if (existing.fn !== incoming.fn && incoming.fn !== 'Unnamed') {
+    if (existing.fn !== incoming.fn && incoming.fn !== 'Unnamed' && !defaultAction) {
         const { name } = await inquirer.prompt([
             {
                 type: 'list',

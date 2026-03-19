@@ -5,7 +5,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "fast-merge": "node index.js --mode merge",
+    "fast-keep": "node index.js --mode keep_existing",
+    "fast-use": "node index.js --mode use_new",
+    "fast-add": "node index.js --mode add"
   },
   "repository": {
     "type": "git",

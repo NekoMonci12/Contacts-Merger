@@ -21,7 +21,11 @@ async function main() {
     console.log(chalk.yellow(`Cleaning output directory: ${outputDir}`));
     await fs.emptyDir(outputDir);
 
-    const outputFile = process.argv[2] ? path.join(outputDir, process.argv[2]) : path.join(outputDir, 'merged_contacts.vcf');
+    const outputFileArg = process.argv.find((arg, i) => i > 1 && !arg.startsWith('--'));
+    const modeArgIdx = process.argv.indexOf('--mode');
+    const defaultAction = modeArgIdx !== -1 ? process.argv[modeArgIdx + 1] : null;
+
+    const outputFile = outputFileArg ? path.join(outputDir, outputFileArg) : path.join(outputDir, 'merged_contacts.vcf');
 
     const files = glob.sync(`${inputDir.replace(/\\/g, '/')}/**/*.vcf`);
     if (files.length === 0) {
@@ -42,9 +46,9 @@ async function main() {
         }
     }
 
-    console.log(chalk.blue(`Total contacts loaded: ${allContacts.length}. Starting deduplication...`));
+    console.log(chalk.blue(`Total contacts loaded: ${allContacts.length}. Starting deduplication${defaultAction ? ` (Mode: ${defaultAction})` : ''}...`));
 
-    const uniqueContacts = await deduplicate(allContacts);
+    const uniqueContacts = await deduplicate(allContacts, defaultAction);
 
     console.log(chalk.green(`\nDeduplication complete. ${uniqueContacts.length} unique contacts remaining.`));
 
