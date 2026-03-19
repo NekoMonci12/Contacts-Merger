@@ -21,11 +21,21 @@ async function main() {
     console.log(chalk.yellow(`Cleaning output directory: ${outputDir}`));
     await fs.emptyDir(outputDir);
 
-    const outputFileArg = process.argv.find((arg, i) => i > 1 && !arg.startsWith('--'));
     const modeArgIdx = process.argv.indexOf('--mode');
     const defaultAction = modeArgIdx !== -1 ? process.argv[modeArgIdx + 1] : null;
 
-    const outputFile = outputFileArg ? path.join(outputDir, outputFileArg) : path.join(outputDir, 'merged_contacts.vcf');
+    // Find output file arg, skipping --mode and its value
+    const outputFileArg = process.argv.slice(2).find((arg, i, arr) => {
+        if (arg.startsWith('--')) return false;
+        if (i > 0 && arr[i-1] === '--mode') return false;
+        return true;
+    });
+
+    let outputFilename = outputFileArg || 'merged_contacts.vcf';
+    if (!outputFilename.toLowerCase().endsWith('.vcf')) {
+        outputFilename += '.vcf';
+    }
+    const outputFile = path.join(outputDir, outputFilename);
 
     const files = glob.sync(`${inputDir.replace(/\\/g, '/')}/**/*.vcf`);
     if (files.length === 0) {
