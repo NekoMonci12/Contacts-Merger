@@ -12,7 +12,8 @@ async function deduplicate(contacts) {
     const phoneMap = new Map(); // Normalized Phone -> uniqueContact index
     const emailMap = new Map(); // Normalized Email -> uniqueContact index
 
-    for (const contact of contacts) {
+    for (let i = 0; i < contacts.length; i++) {
+        const contact = contacts[i];
         let duplicateIdx = -1;
 
         // Check phones
@@ -58,7 +59,7 @@ async function deduplicate(contacts) {
                 }
             }
 
-            const action = await promptMergeAction(existing, contact, matchReason);
+            const action = await promptMergeAction(existing, contact, matchReason, i + 1, contacts.length);
 
             if (action === 'merge') {
                 const merged = await mergeContacts(existing, contact);
@@ -98,8 +99,8 @@ function updateMaps(contact, idx, phoneMap, emailMap) {
     });
 }
 
-async function promptMergeAction(existing, incoming, matchReason) {
-    console.log(chalk.yellow('\n--- Potential Duplicate Detected ---'));
+async function promptMergeAction(existing, incoming, matchReason, current, total) {
+    console.log(chalk.yellow(`\n--- Potential Duplicate Detected (${current}/${total}) ---`));
     console.log(chalk.white(`Match criteria: ${matchReason}`));
     console.log(chalk.cyan('Existing:'), `${existing.fn} (${existing.tel.join(', ')} / ${existing.email.join(', ')})`);
     console.log(chalk.magenta('Incoming:'), `${incoming.fn} (${incoming.tel.join(', ')} / ${incoming.email.join(', ')})`);
