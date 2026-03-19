@@ -1,0 +1,28 @@
+{
+  "name": "contacts-merger",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NekoMonci12/Contacts-Merger.git"
+  },
+  "author": "NekoMonci12",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NekoMonci12/Contacts-Merger/issues"
+  },
+  "homepage": "https://github.com/NekoMonci12/Contacts-Merger#readme",
+  "keywords": [],
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "fs-extra": "^11.3.4",
+    "glob": "^13.0.6",
+    "inquirer": "^13.3.2",
+    "vcf": "^2.1.2"
+  }
+}
